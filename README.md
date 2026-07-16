@@ -59,6 +59,26 @@ src/
     referral.ts             referral cookie + link helpers
 ```
 
+## Deploying (Vercel)
+
+Hosted on Vercel (`bash.hackclub.com`). Import the repo into the Hack Club
+Vercel team — Next.js + Bun are auto-detected (see `vercel.json`). Then set
+these environment variables in **Settings → Environment Variables** (values
+from `.env.example`):
+
+```
+AUTH_SECRET            # openssl rand -hex 32
+HCAUTH_CLIENT_ID       # auth.hackclub.com/developer_apps
+HCAUTH_CLIENT_SECRET
+RESEND_API_KEY         # resend.com (verified sending domain)
+AIRTABLE_API_KEY
+AIRTABLE_BASE_ID
+```
+
+HC Auth redirect URIs to register (exact, no trailing slash):
+`https://bash.hackclub.com/api/auth/callback` and
+`http://localhost:3000/api/auth/callback`.
+
 ## Airtable tables
 
 `people` · `meetups` · `signups` · `submissions` · `payouts` · `magic_links` —
