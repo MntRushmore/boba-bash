@@ -11,14 +11,22 @@ export type MeetupStatus = "pending" | "approved" | "rejected" | "cancelled";
 export type PayoutStatus = "advanced" | "reconciled" | "settled";
 export type RsvpStatus = "going" | "waitlist" | "cancelled";
 
-/** People — one row per account (organizer or attendee). */
+/**
+ * People — one row per account. Email is the shared identity key across both
+ * auth paths. Organizers authenticate via Hack Club Auth (so they carry an
+ * `hcauth_sub`); attendees authenticate via our magic link (no HC identity).
+ */
 export interface PersonFields {
-  slack_id: string;
   email: string;
   full_name?: string;
-  /** Real mailing address collected at signup — part of the fraud line. */
-  mailing_address?: string;
   role: Role;
+  /** HC Auth `sub` (organizers only) — format `ident!...`. */
+  hcauth_sub?: string;
+  /**
+   * Mailing address (fraud line). For organizers this comes from HC Auth's
+   * `address` scope; for attendees it's collected in our own signup form.
+   */
+  mailing_address?: string;
   /** Unique code that powers this organizer's referral link. */
   referral_code?: string;
   /** Linked People record id of the organizer who referred this person. */
@@ -87,6 +95,19 @@ export interface PayoutFields {
   clawback?: number;
   status: PayoutStatus;
   claimed_at?: string;
+}
+
+/**
+ * MagicLinks — one-time email login tokens for ATTENDEES (our own flow, not HC
+ * Auth). We store only a hash of the token; the raw token lives only in the
+ * emailed link. Consumed on first use.
+ */
+export interface MagicLinkFields {
+  email: string;
+  /** SHA-256 hex of the raw token. */
+  token_hash: string;
+  expires_at: string;
+  consumed?: boolean;
 }
 
 /** Dollars credited to an organizer per fraud-cleared signup. */

@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main className="flex-1">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-caramel to-caramel-deep text-cream-soft">
+      <section className="relative overflow-hidden bg-linear-to-br from-caramel to-caramel-deep text-cream-soft">
         <div className="mx-auto max-w-4xl px-6 py-24 sm:py-32 text-center">
           <Image
             src="/images/logo.svg"

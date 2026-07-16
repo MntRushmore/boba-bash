@@ -9,7 +9,7 @@ Modeled on Hack Club's [High Seas / Mystic Tavern](https://github.com/hackclub/h
 - **Next.js 16** (App Router) + React 19 + TypeScript
 - **Tailwind CSS v4**
 - **Airtable** as the datastore, via the `middleman.hackclub.com` proxy
-- **Slack OpenID** sign-in with signed-cookie sessions (ported from high-seas)
+- **Split auth** — organizers sign in with [Hack Club Auth](https://auth.hackclub.com) (OIDC); attendees use our own email magic link (via [Resend](https://resend.com)). Both land in the same signed-cookie session.
 - Hosted on **Vercel**, `bash.hackclub.com`
 - Package manager: **Bun**
 
@@ -25,35 +25,41 @@ Open http://localhost:3000.
 
 ## How it works
 
-- **Organizers** put a meetup on the live map, share a referral link
-  (`/j/<code>`), and earn **$8.50 per fraud-cleared signup** toward food — paid
-  in advance, reconciled after. Money is for the café/food bill.
-- **Attendees** pick a Bash off the map, RSVP with Slack, show up, and submit
-  the site they build. Staff-approved submissions are how Hack Club recovers
-  its cost — a separate metric that never changes the organizer's payout.
+- **Organizers** sign in with Hack Club Auth, put a meetup on the live map,
+  share a referral link (`/j/<code>`), and earn **$8.50 per fraud-cleared
+  signup** toward food — paid in advance, reconciled after. Money is for the
+  café/food bill.
+- **Attendees** pick a Bash off the map, sign in with an email magic link,
+  show up, and submit the site they build. Staff-approved submissions are how
+  Hack Club recovers its cost — a separate metric that never changes the
+  organizer's payout.
 - **Staff** approve meetups and submissions, and clear signup fraud, directly
   in Airtable.
-
-## Data model (Airtable)
-
-`people` · `meetups` · `signups` · `submissions` · `payouts` — see
-[`src/lib/schema.ts`](src/lib/schema.ts) for the typed field shapes.
 
 ## Project layout
 
 ```
 src/
   app/
-    api/login/            Slack OAuth kickoff
-    api/slack_redirect/   Slack OAuth callback → session
-    j/[code]/             referral link entry point
-    signin/               sign-in screen
-    dashboard/            role-routed dashboard (WIP)
-    signout/              clears the session
+    api/login/              organizer → Hack Club Auth (OIDC) kickoff
+    api/auth/callback/      Hack Club Auth callback → session
+    api/attendee/request/   attendee → send magic link (Resend)
+    api/attendee/verify/    attendee → consume magic link → session
+    j/[code]/               referral link entry point
+    signin/                 sign-in screen (both paths)
+    dashboard/              role-routed dashboard (WIP)
+    signout/                clears the session
   lib/
-    airtable.ts           middleman proxy client
-    schema.ts             typed table fields
-    people.ts             Person lookups, creation, referral attribution
-    auth.ts               signed-cookie Slack session
-    referral.ts           referral cookie + link helpers
+    airtable.ts             middleman proxy client
+    schema.ts               typed table fields
+    people.ts               Person lookups, upserts, referral attribution
+    auth.ts                 signed-cookie session (shared by both paths)
+    hcauth.ts               Hack Club Auth OIDC helpers
+    magiclink.ts            attendee magic-link tokens + Resend sender
+    referral.ts             referral cookie + link helpers
 ```
+
+## Airtable tables
+
+`people` · `meetups` · `signups` · `submissions` · `payouts` · `magic_links` —
+see [`src/lib/schema.ts`](src/lib/schema.ts) for the typed field shapes.

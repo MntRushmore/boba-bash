@@ -1,54 +1,41 @@
 import "server-only";
 
-import { cookies, headers } from "next/headers";
-import { upsertPersonOnLogin } from "./people";
+import { cookies } from "next/headers";
 import type { Role } from "./schema";
 
 /*
- * Signed-cookie session, ported from Hack Club high-seas (utils/server/auth.ts)
- * with three deliberate changes:
- *   1. `cookies()` / `headers()` are awaited (Next 15+ made them async).
- *   2. `verifySession` uses a constant-time compare instead of `===`.
- *   3. The session carries our `role`, and first sign-in CREATES a Person
- *      (high-seas disabled signups when the event ended).
+ * Signed-cookie session, shared by both auth paths:
+ *   - Organizers  → Hack Club Auth (OIDC)      → createHcAuthSession
+ *   - Attendees   → our own magic email link   → createMagicSession
+ *
+ * The session itself is auth-method agnostic: a JSON blob HMAC-signed with
+ * AUTH_SECRET (SHA-256), stored in an httpOnly cookie, verified with a
+ * constant-time compare. Ported from Hack Club high-seas, generalized.
  */
 
 export interface BashSession {
   /** People record id. */
   personId: string;
-  authType: "slack-oauth";
-  slackId: string;
+  authType: "hc-auth" | "magic-link";
+  /** HC Auth `sub` (organizers) — absent for magic-link attendees. */
+  hcAuthSub?: string;
   email: string;
   name?: string;
   role: Role;
-  picture?: string;
   sig?: string;
 }
 
 export const SESSION_COOKIE = "bash-session";
 const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
-function parseJwt(token: string): Record<string, unknown> {
-  const base64Url = token.split(".")[1];
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  const json = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-      .join(""),
-  );
-  return JSON.parse(json);
-}
-
 async function hashSession(session: BashSession): Promise<string> {
   const str = [
     session.personId,
     session.authType,
-    session.slackId,
+    session.hcAuthSub || "",
     session.email,
     session.name || "",
     session.role,
-    session.picture || "",
   ].join("|");
 
   const authSecret = process.env.AUTH_SECRET;
@@ -116,52 +103,21 @@ export async function deleteSession(): Promise<void> {
   store.delete(SESSION_COOKIE);
 }
 
-/**
- * Exchange a Slack OpenID id_token for a session. Creates the Person on first
- * sign-in (attendee by default).
- */
-export async function createSlackSession(idToken: string): Promise<void> {
-  const payload = parseJwt(idToken);
-  const slackId = payload.sub as string;
-  const email = payload.email as string;
-  if (!slackId || !email) throw new Error("Slack token missing sub/email");
-
-  const person = await upsertPersonOnLogin({
-    slackId,
-    email,
-    fullName: payload.name as string | undefined,
-  });
-
+/** Establish a signed session for a resolved Person. */
+export async function establishSession(input: {
+  personId: string;
+  authType: BashSession["authType"];
+  email: string;
+  name?: string;
+  role: Role;
+  hcAuthSub?: string;
+}): Promise<void> {
   await signAndSet({
-    personId: person.id,
-    authType: "slack-oauth",
-    slackId,
-    email,
-    name: (payload.name as string) || person.fields.full_name,
-    role: person.fields.role,
-    picture: payload.picture as string | undefined,
+    personId: input.personId,
+    authType: input.authType,
+    hcAuthSub: input.hcAuthSub,
+    email: input.email,
+    name: input.name,
+    role: input.role,
   });
-}
-
-/** Build the OAuth redirect_uri from the incoming request host. */
-export async function getRedirectUri(): Promise<string> {
-  const h = await headers();
-  const host = h.get("host") || "";
-  const proto = h.get("x-forwarded-proto") || "http";
-  return `${proto}://${host}/api/slack_redirect`;
-}
-
-/** Slack "Sign in with Slack" (OpenID) authorize URL. */
-export async function getSlackAuthUrl(state?: string): Promise<string> {
-  const clientId = process.env.SLACK_CLIENT_ID;
-  if (!clientId) throw new Error("Env SLACK_CLIENT_ID is not set");
-  const redirectUri = await getRedirectUri();
-  const params = new URLSearchParams({
-    response_type: "code",
-    scope: "openid profile email",
-    client_id: clientId,
-    redirect_uri: redirectUri,
-  });
-  if (state) params.set("state", state);
-  return `https://slack.com/openid/connect/authorize?${params.toString()}`;
 }

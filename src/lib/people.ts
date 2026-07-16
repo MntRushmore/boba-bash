@@ -9,20 +9,19 @@ import {
 } from "./airtable";
 import type { PersonFields, Role } from "./schema";
 
-const SLACK_ID_RE = /^[UW][A-Z0-9]{8,11}$/;
-
 export type PersonRecord = AirtableRecord<PersonFields>;
 
-/** Look up a Person by their Slack user id. */
-export async function getPersonBySlackId(
-  slackId: string,
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+/** Look up a Person by email (the shared identity key). */
+export async function getPersonByEmail(
+  email: string,
 ): Promise<PersonRecord | null> {
-  if (!SLACK_ID_RE.test(slackId)) {
-    throw new Error(`Invalid Slack ID passed to getPersonBySlackId: ${slackId}`);
-  }
   return findOne<PersonFields>(
     "people",
-    `{slack_id} = '${escapeFormulaValue(slackId)}'`,
+    `LOWER({email}) = '${escapeFormulaValue(normalizeEmail(email))}'`,
   );
 }
 
@@ -37,33 +36,50 @@ export async function getPersonByReferralCode(
 }
 
 /**
- * Create a Person on first sign-in. Everyone starts as an attendee; becoming an
- * organizer happens when they create a meetup. A referral code is generated for
- * every account so anyone can share their link.
+ * Upsert an ORGANIZER from a Hack Club Auth login. Creates on first sign-in,
+ * marks them an organizer, and stores the mailing address pulled from HC Auth.
  */
-export async function createPerson(input: {
-  slackId: string;
+export async function upsertOrganizerFromHcAuth(input: {
+  sub: string;
   email: string;
-  fullName?: string;
-  role?: Role;
+  name?: string;
+  address?: string;
 }): Promise<PersonRecord> {
+  const email = normalizeEmail(input.email);
+  const existing = await getPersonByEmail(email);
+  if (existing) {
+    // Keep HC-sourced fields fresh; ensure organizer role.
+    return updateRecord<PersonFields>("people", existing.id, {
+      hcauth_sub: input.sub,
+      role: "organizer",
+      ...(input.address ? { mailing_address: input.address } : {}),
+    });
+  }
   return createRecord<PersonFields>("people", {
-    slack_id: input.slackId,
-    email: input.email,
-    full_name: input.fullName,
-    role: input.role ?? "attendee",
-    referral_code: generateReferralCode(input.slackId),
+    email,
+    full_name: input.name,
+    role: "organizer",
+    hcauth_sub: input.sub,
+    mailing_address: input.address,
+    referral_code: generateReferralCode(email),
   });
 }
 
-export async function upsertPersonOnLogin(input: {
-  slackId: string;
-  email: string;
-  fullName?: string;
-}): Promise<PersonRecord> {
-  const existing = await getPersonBySlackId(input.slackId);
+/**
+ * Upsert an ATTENDEE from a verified magic-link email. Creates on first login.
+ * Attendees start with the attendee role and no HC identity.
+ */
+export async function upsertAttendeeByEmail(
+  rawEmail: string,
+): Promise<PersonRecord> {
+  const email = normalizeEmail(rawEmail);
+  const existing = await getPersonByEmail(email);
   if (existing) return existing;
-  return createPerson(input);
+  return createRecord<PersonFields>("people", {
+    email,
+    role: "attendee",
+    referral_code: generateReferralCode(email),
+  });
 }
 
 export async function setRole(
@@ -94,9 +110,15 @@ export async function applyReferral(
 }
 
 /**
- * Deterministic, URL-safe referral code derived from the Slack id — stable per
- * person and readable in a link. Not a secret; it only attributes signups.
+ * URL-safe referral code derived from the email — stable per person and
+ * readable in a link. Not a secret; it only attributes signups.
  */
-function generateReferralCode(slackId: string): string {
-  return slackId.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 10);
+function generateReferralCode(email: string): string {
+  const local = email.split("@")[0] ?? email;
+  const slug = local.toLowerCase().replace(/[^a-z0-9]/g, "");
+  // Short hash suffix keeps codes unique when local-parts collide.
+  let h = 0;
+  for (let i = 0; i < email.length; i++) h = (h * 31 + email.charCodeAt(i)) | 0;
+  const suffix = (h >>> 0).toString(36).slice(0, 4);
+  return `${slug.slice(0, 8)}${suffix}`;
 }

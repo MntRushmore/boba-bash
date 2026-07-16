@@ -1,23 +1,25 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { getPersonByEmail, applyReferral } from "@/lib/people";
+import { readReferral, clearReferral } from "@/lib/referral";
 
 export const dynamic = "force-dynamic";
-import { getPersonBySlackId, applyReferral } from "@/lib/people";
-import { readReferral, clearReferral } from "@/lib/referral";
 
 export default async function Dashboard() {
   const session = await getSession();
   if (!session) redirect("/signin");
 
-  // Apply a pending referral once, on first authenticated load.
-  const person = await getPersonBySlackId(session.slackId);
-  const refCode = await readReferral();
-  if (person && refCode) {
-    await applyReferral(person, refCode);
-    await clearReferral();
-  }
-
   const isOrganizer = session.role === "organizer";
+
+  // Apply a pending referral once, on an attendee's first authenticated load.
+  if (!isOrganizer) {
+    const refCode = await readReferral();
+    if (refCode) {
+      const person = await getPersonByEmail(session.email);
+      if (person) await applyReferral(person, refCode);
+      await clearReferral();
+    }
+  }
 
   return (
     <main className="flex-1 mx-auto w-full max-w-4xl px-6 py-16">

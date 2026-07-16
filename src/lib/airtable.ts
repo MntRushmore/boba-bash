@@ -18,7 +18,8 @@ export type TableName =
   | "meetups"
   | "signups"
   | "submissions"
-  | "payouts";
+  | "payouts"
+  | "magic_links";
 
 export interface AirtableRecord<F> {
   id: string;
