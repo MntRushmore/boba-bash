@@ -11,7 +11,8 @@ import "server-only";
  *   AIRTABLE_BASE_ID  — the Boba Bash base id (app...)
  */
 
-const PROXY = "https://api.airtable.com/v0";
+// Override for local testing / self-hosted proxies; defaults to Airtable.
+const PROXY = process.env.AIRTABLE_API_BASE || "https://api.airtable.com/v0";
 const UA = "bash.hackclub.com";
 
 export type TableName =
