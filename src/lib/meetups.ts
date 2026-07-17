@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   createRecord,
+  getRecord,
   selectRecords,
   updateRecord,
   type AirtableRecord,
@@ -52,4 +53,33 @@ export async function updateMeetup(
   fields: Partial<MeetupFields>,
 ): Promise<MeetupRecord> {
   return updateRecord<MeetupFields>("meetups", id, fields);
+}
+
+/** Publicly listable meetups: staff-approved and not hidden. */
+export async function getPublicMeetups(): Promise<MeetupRecord[]> {
+  const records = await selectRecords<MeetupFields>("meetups", {
+    filterByFormula: `AND({status} = 'approved', NOT({hidden}))`,
+  });
+  return records;
+}
+
+/** A single meetup by record id, or null. */
+export async function getMeetup(id: string): Promise<MeetupRecord | null> {
+  try {
+    return await getRecord<MeetupFields>("meetups", id);
+  } catch {
+    return null;
+  }
+}
+
+/** Parse a "lat,lng" geocode into numbers, or null if missing/invalid. */
+export function parseGeocode(
+  geocode?: string,
+): { lat: number; lng: number } | null {
+  if (!geocode) return null;
+  const [latStr, lngStr] = geocode.split(",").map((s) => s.trim());
+  const lat = Number(latStr);
+  const lng = Number(lngStr);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  return { lat, lng };
 }

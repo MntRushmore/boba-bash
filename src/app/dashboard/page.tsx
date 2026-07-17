@@ -3,8 +3,10 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { getPersonByEmail, applyReferral } from "@/lib/people";
 import { readReferral, clearReferral } from "@/lib/referral";
-import { getMeetupsByOrganizer } from "@/lib/meetups";
+import { getMeetupsByOrganizer, getMeetup } from "@/lib/meetups";
 import { getOrganizerStats } from "@/lib/stats";
+import { getSignupsByPerson } from "@/lib/signups";
+import { getSubmission } from "@/lib/submissions";
 import { PAYOUT_PER_SIGNUP } from "@/lib/schema";
 import ReferralLink from "./ReferralLink";
 
@@ -66,7 +68,7 @@ export default async function Dashboard({
           referralCode={person?.fields.referral_code}
         />
       ) : (
-        <AttendeeView email={session.email} />
+        <AttendeeView personId={session.personId} email={session.email} />
       )}
     </main>
   );
@@ -171,14 +173,97 @@ async function OrganizerView({
   );
 }
 
-function AttendeeView({ email }: { email: string }) {
+async function AttendeeView({
+  personId,
+  email,
+}: {
+  personId: string;
+  email: string;
+}) {
+  const signups = await getSignupsByPerson(personId);
+
+  // Resolve each RSVP'd meetup + this attendee's submission status for it.
+  const cards = (
+    await Promise.all(
+      signups.map(async (s) => {
+        const meetupId = s.fields.meetup?.[0];
+        if (!meetupId) return null;
+        const [meetup, submission] = await Promise.all([
+          getMeetup(meetupId),
+          getSubmission(personId, meetupId),
+        ]);
+        if (!meetup) return null;
+        return {
+          meetupId,
+          name: meetup.fields.name,
+          detail: [meetup.fields.venue, meetup.fields.city, meetup.fields.date]
+            .filter(Boolean)
+            .join(" · "),
+          submissionStatus: submission?.fields.status ?? null,
+        };
+      }),
+    )
+  ).filter((c) => c !== null);
+
   return (
-    <div className="mt-8 rounded-xl border border-line bg-paper-2 p-6">
-      <p className="text-ink-soft">
-        You&apos;re signed in as{" "}
-        <span className="font-mono text-sm text-ink">{email}</span>. Finding a
-        Bash on the map, RSVP, and submitting your site land in the next build
-        phase.
+    <div className="mt-8 flex flex-col gap-8">
+      <section className="flex flex-wrap items-center gap-3">
+        <a
+          href="/map"
+          className="rounded-full bg-syrup px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wide text-cream-soft transition hover:-translate-y-0.5"
+        >
+          Find a Bash
+        </a>
+        {cards.length > 0 ? (
+          <a
+            href="/submit"
+            className="rounded-full border border-line px-5 py-2.5 font-mono text-xs font-semibold uppercase tracking-wide text-ink transition hover:border-accent"
+          >
+            Submit your site
+          </a>
+        ) : null}
+      </section>
+
+      <section>
+        <h2 className="font-display text-xl font-semibold">Your Bashes</h2>
+        {cards.length === 0 ? (
+          <p className="mt-4 rounded-xl border border-dashed border-line px-5 py-8 text-center text-ink-soft">
+            You haven&apos;t RSVP&apos;d yet. Find a Bash on the{" "}
+            <a href="/map" className="underline">
+              map
+            </a>
+            .
+          </p>
+        ) : (
+          <ul className="mt-4 flex flex-col gap-3">
+            {cards.map((c) => (
+              <li
+                key={c.meetupId}
+                className="flex items-center justify-between rounded-xl border border-line bg-card px-5 py-4"
+              >
+                <div>
+                  <p className="font-semibold">{c.name}</p>
+                  <p className="text-sm text-ink-soft">{c.detail}</p>
+                </div>
+                {c.submissionStatus ? (
+                  <StatusPill status={c.submissionStatus} />
+                ) : (
+                  <a
+                    href="/submit"
+                    className="font-mono text-xs uppercase tracking-wide text-accent hover:underline"
+                  >
+                    Submit site →
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <p className="text-sm text-ink-soft">
+        Signed in as{" "}
+        <span className="font-mono text-ink">{email}</span>.
       </p>
     </div>
   );
