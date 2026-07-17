@@ -38,16 +38,14 @@ function project(lat: number, lng: number) {
   return { x: CX + dx, y: CY + dy };
 }
 
-/** Static hand-drawn continents + sweeping straws. Shared by inline + overlay. */
-function GlobeArt() {
+/**
+ * The land masses, drawn once, positioned so they tile horizontally: the group
+ * is rendered twice (offset by the disc diameter) inside the spinning wrapper so
+ * that as it scrolls left, the second copy seamlessly fills in — a globe turning.
+ */
+function LandMasses() {
   return (
     <>
-      <path d="M20 96 C140 54 320 66 452 178" style={{ stroke: "#3aa0d8", strokeWidth: 2.6 }} />
-      <circle cx={CX} cy={CY} r={R} style={{ fill: "var(--ocean)", strokeWidth: 4.4 }} />
-      <path
-        d="M136 206 C166 218 186 222 210 220 M296 252 C318 242 332 230 342 214"
-        style={{ stroke: "#7ec3e4", strokeWidth: 2 }}
-      />
       <path d="M170 58 C185 46 212 46 224 58 C218 70 196 74 180 70 C172 66 168 62 170 58 Z" style={{ fill: "var(--conf-teal)" }} />
       <path d="M148 80 C164 62 200 58 216 72 C228 82 224 98 210 102 C220 108 216 120 206 126 C194 138 184 148 172 152 C156 154 142 140 138 122 C132 106 138 92 148 80 Z" style={{ fill: "var(--taro)" }} />
       <path d="M186 154 C196 150 204 156 206 166 C200 172 190 170 186 162 Z" style={{ fill: "var(--conf-orange)" }} />
@@ -58,6 +56,61 @@ function GlobeArt() {
       <path d="M308 80 C328 64 348 72 351 94 C352 112 344 126 330 130 C338 136 336 148 326 152 C314 156 302 146 299 132 C305 126 306 118 304 110 C300 96 302 88 308 80 Z" style={{ fill: "var(--conf-orange)" }} />
       <path d="M318 134 C328 130 336 138 334 150 C330 160 320 160 316 150 C314 144 314 138 318 134 Z" style={{ fill: "var(--conf-pink)" }} />
       <path d="M318 226 C330 218 346 222 348 234 C346 246 330 250 320 242 C314 236 314 232 318 226 Z" style={{ fill: "var(--conf-orange)" }} />
+    </>
+  );
+}
+
+/**
+ * The 3D-ish globe: ocean disc, spinning land clipped to the disc, spherical
+ * shading (highlight + terminator), rim, and the boba-straw orbit sweeps.
+ * `spin` toggles the rotation animation.
+ */
+function GlobeArt({ spin, uid }: { spin?: boolean; uid: string }) {
+  const clip = `globeClip-${uid}`;
+  const shade = `globeShade-${uid}`;
+  const glow = `globeGlow-${uid}`;
+  return (
+    <>
+      <defs>
+        <clipPath id={clip}>
+          <circle cx={CX} cy={CY} r={R - 2} />
+        </clipPath>
+        <radialGradient id={glow} cx="38%" cy="32%" r="72%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.55" />
+          <stop offset="45%" stopColor="#ffffff" stopOpacity="0.08" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={shade} cx="64%" cy="70%" r="72%">
+          <stop offset="55%" stopColor="#1a3a4a" stopOpacity="0" />
+          <stop offset="100%" stopColor="#173247" stopOpacity="0.42" />
+        </radialGradient>
+      </defs>
+
+      {/* orbit straw passing behind */}
+      <path d="M20 96 C140 54 320 66 452 178" style={{ stroke: "#7a5cc4", strokeWidth: 2.6 }} />
+
+      {/* ocean */}
+      <circle cx={CX} cy={CY} r={R} style={{ fill: "var(--ocean)", strokeWidth: 4.4 }} />
+
+      {/* spinning land + latitude ripples, clipped to the sphere */}
+      <g clipPath={`url(#${clip})`}>
+        <g className={spin ? "hd-globe-spin" : undefined}>
+          <g>
+            <LandMasses />
+          </g>
+          <g transform={`translate(${2 * R - 4} 0)`}>
+            <LandMasses />
+          </g>
+        </g>
+        {/* spherical shading — no stroke, pure fill overlays */}
+        <circle cx={CX} cy={CY} r={R} style={{ fill: `url(#${shade})`, stroke: "none", filter: "none" }} />
+        <circle cx={CX} cy={CY} r={R} style={{ fill: `url(#${glow})`, stroke: "none", filter: "none" }} />
+      </g>
+
+      {/* rim */}
+      <circle cx={CX} cy={CY} r={R} style={{ fill: "none", strokeWidth: 4.4 }} />
+
+      {/* orbit straw passing in front */}
       <path d="M14 240 C120 270 330 234 456 128" style={{ stroke: "var(--conf-pink)", strokeWidth: 3 }} />
     </>
   );
@@ -126,10 +179,14 @@ function GlobeSvg({
   pins,
   nextDrop,
   onHover,
+  spin,
+  uid,
 }: {
   pins: GlobePin[];
   nextDrop?: string;
   onHover: (p: GlobePin | null) => void;
+  spin?: boolean;
+  uid: string;
 }) {
   return (
     <svg
@@ -141,7 +198,7 @@ function GlobeSvg({
       role="img"
       aria-label="Worldwide boba map"
     >
-      <GlobeArt />
+      <GlobeArt spin={spin} uid={uid} />
       {nextDrop ? <NextDropMark nextDrop={nextDrop} /> : null}
       {pins.map((p) => (
         <Pin key={p.id} pin={p} onHover={onHover} />
@@ -191,7 +248,7 @@ export default function BobaGlobe({
         onClick={() => setOpen(true)}
         aria-label="Expand the worldwide boba map"
       >
-        <GlobeSvg pins={pins} nextDrop={nextDrop} onHover={setHover} />
+        <GlobeSvg pins={pins} nextDrop={nextDrop} onHover={setHover} spin uid="inline" />
         {hover ? (
           <span className="hd-globe-tip">
             <b>{hover.name}</b>
@@ -239,7 +296,7 @@ export default function BobaGlobe({
             </div>
             <div className="hd-modal-body">
               <div className="hd-modal-globe">
-                <GlobeSvg pins={pins} nextDrop={nextDrop} onHover={setHover} />
+                <GlobeSvg pins={pins} nextDrop={nextDrop} onHover={setHover} spin uid="modal" />
               </div>
               <div className="hd-modal-list">
                 <div className="hd-xp-h">

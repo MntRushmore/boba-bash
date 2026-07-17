@@ -1253,3 +1253,170 @@ a {
   background: linear-gradient(160deg, var(--paper), var(--paper2));
   padding: 24px;
 }
+
+/* ============================================================
+   ANIMATED BOBA 404
+   ============================================================ */
+.hd-404 {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 24px 56px;
+  text-align: center;
+  background: radial-gradient(60rem 30rem at 50% 12%, rgba(232, 201, 160, 0.5), transparent 60%),
+    linear-gradient(160deg, var(--paper), var(--paper2));
+}
+.hd-404-cup {
+  filter: drop-shadow(4px 6px 0 rgba(58, 38, 24, 0.14));
+  animation: hd-404-sway 3.6s ease-in-out infinite;
+  transform-origin: 100px 284px;
+}
+@keyframes hd-404-sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+/* the hand-drawn ink strokes on the cup */
+.hd-404-ink path {
+  stroke: var(--ink);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#wob);
+}
+.hd-404-ink path[fill="#f6ecdd"],
+.hd-404-ink path[fill="#fff"] {
+  stroke-width: 3;
+}
+.hd-404-straw {
+  fill: none;
+  stroke: var(--taro);
+  stroke-width: 11;
+}
+.hd-404-straw.straw2 {
+  stroke: #d7b3ef;
+  stroke-width: 4;
+}
+/* liquid wave rocks side to side */
+.hd-404-wave {
+  animation: hd-404-wave 2.6s linear infinite;
+}
+@keyframes hd-404-wave {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(120px); }
+}
+/* pearls rise up and fade near the top */
+.hd-404-pearl {
+  animation-name: hd-404-rise;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+@keyframes hd-404-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  15% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(-120px); opacity: 0; }
+}
+.hd-404-code {
+  font-family: var(--font-marker), cursive;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--red);
+  margin-top: 8px;
+}
+.hd-404-title {
+  font-family: var(--font-marker), cursive;
+  font-size: clamp(30px, 6vw, 48px);
+  color: var(--ink);
+  transform: rotate(-1deg);
+  margin: 2px 0 6px;
+}
+.hd-404-note {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 40ch;
+}
+.hd-404-btns {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hd-404-cup,
+  .hd-404-wave,
+  .hd-404-pearl {
+    animation: none;
+  }
+  .hd-404-pearl {
+    opacity: 0.85;
+  }
+}
+
+/* ---------- 3D rotating globe ---------- */
+.hd-globe-spin {
+  animation: hd-globe-rotate 24s linear infinite;
+}
+/* land tiles are drawn twice, offset by the disc diameter (2R-4 = 244);
+   scrolling left by exactly that distance loops seamlessly. */
+@keyframes hd-globe-rotate {
+  from { transform: translateX(0); }
+  to { transform: translateX(-244px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hd-globe-spin {
+    animation: none;
+  }
+}
+
+/* ---------- hand-drawn loading state ---------- */
+.hd-loading {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, var(--paper), var(--paper2));
+}
+.hd-loading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.hd-loading-cup {
+  animation: hd-loading-bob 1.4s ease-in-out infinite;
+}
+@keyframes hd-loading-bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-8px) rotate(3deg); }
+}
+.hd-loading-pearl {
+  animation: hd-loading-jiggle 0.9s ease-in-out infinite;
+}
+.hd-loading-pearl.p2 { animation-delay: 0.15s; }
+.hd-loading-pearl.p3 { animation-delay: 0.3s; }
+@keyframes hd-loading-jiggle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.hd-loading-label {
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hd-loading-cup,
+  .hd-loading-pearl {
+    animation: none;
+  }
+}
+
+/* doodle inside empty-state boxes */
+.hd-empty .hd-empty-cup {
+  display: block;
+  margin: 0 auto 10px;
+  opacity: 0.7;
+}

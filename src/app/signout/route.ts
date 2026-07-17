@@ -3,5 +3,5 @@ import { deleteSession } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   await deleteSession();
-  return NextResponse.redirect(new URL("/", request.nextUrl.origin));
+  return NextResponse.redirect(new URL("/goodbye", request.nextUrl.origin));
 }

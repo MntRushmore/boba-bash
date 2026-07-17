@@ -5,6 +5,7 @@ import { getSignupsByPerson } from "@/lib/signups";
 import { getMeetup } from "@/lib/meetups";
 import HdShell from "../HdShell";
 import SubmitForm from "./SubmitForm";
+import { CupStat } from "../dashboard/doodles";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,9 @@ export default async function SubmitPage() {
 
         {meetups.length === 0 ? (
           <div className="hd-empty sk thin soft" style={{ marginTop: 18 }}>
+            <span className="hd-empty-cup">
+              <CupStat size={38} />
+            </span>
             You haven&apos;t RSVP&apos;d to a Bash yet. Find one on the{" "}
             <Link href="/map">map</Link> first.
           </div>

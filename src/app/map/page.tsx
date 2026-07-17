@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getPublicMeetups, parseGeocode } from "@/lib/meetups";
 import HdShell from "../HdShell";
 import MapView from "./MapView";
+import { CupStat } from "../dashboard/doodles";
 import type { MapPin } from "./MapInner";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,9 @@ export default async function MapPage() {
         <h2 className="hd-panel-title">all Bashes</h2>
         {meetups.length === 0 ? (
           <div className="hd-empty sk thin soft" style={{ marginTop: 12 }}>
+            <span className="hd-empty-cup">
+              <CupStat size={38} />
+            </span>
             No approved Bashes yet — check back soon, or{" "}
             <Link href="/dashboard">organize one</Link>.
           </div>
