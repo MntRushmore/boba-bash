@@ -57,6 +57,8 @@ export interface MeetupFields {
  * organizer $8.50. Attendance and submission are NOT required to earn.
  */
 export interface SignupFields {
+  /** Human-readable primary field (Airtable requires a non-link primary). */
+  label?: string;
   person: string[]; // linked People id
   meetup: string[]; // linked Meetups id
   /** Did this signup arrive through the organizer's referral link? */
@@ -73,6 +75,8 @@ export interface SignupFields {
  * cost-recovery metric; it does NOT change the organizer's payout.
  */
 export interface SubmissionFields {
+  /** Human-readable primary field. */
+  label?: string;
   person: string[]; // linked People id
   meetup: string[]; // linked Meetups id
   repo_url?: string;
@@ -87,6 +91,8 @@ export interface SubmissionFields {
  * reconciled with clawback of any excess.
  */
 export interface PayoutFields {
+  /** Human-readable primary field. */
+  label?: string;
   organizer: string[]; // linked People id
   cleared_signups?: number;
   advanced_amount?: number;

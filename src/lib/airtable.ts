@@ -1,16 +1,17 @@
 import "server-only";
 
 /*
- * Airtable access, via Hack Club's middleman proxy — the same pattern high-seas
- * uses (no `airtable` npm SDK, no direct api.airtable.com calls). The proxy adds
- * caching and keeps our key server-side. All reads/writes go through here.
+ * Airtable access via the Airtable REST API directly, authenticated with a
+ * personal access token. (high-seas fronts Airtable with the middleman proxy
+ * for caching, but that proxy 403/406'd our base; the PAT works against the
+ * REST API directly, so we use that and keep the token server-side.)
  *
  * Env:
- *   AIRTABLE_API_KEY  — bearer token for the middleman proxy
+ *   AIRTABLE_API_KEY  — Airtable personal access token (pat...)
  *   AIRTABLE_BASE_ID  — the Boba Bash base id (app...)
  */
 
-const PROXY = "https://middleman.hackclub.com/airtable/v0";
+const PROXY = "https://api.airtable.com/v0";
 const UA = "bash.hackclub.com";
 
 export type TableName =
