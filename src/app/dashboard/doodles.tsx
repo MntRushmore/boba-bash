@@ -291,14 +291,14 @@ export const HackFlag = ({ size = 52 }: { size?: number }) => (
       d="M6 4 C20 -1 30 9 48 3 C46 9 46 13 48 19 C32 24 20 15 6 18"
       style={{ fill: "#f2739e", stroke: "#b23a63" }}
     />
-    <text x="12" y="14" style={{ fontFamily: "var(--font-marker)", fontSize: 8, fill: "#fff", stroke: "none", filter: "none" }}>
+    <text x="12" y="14" style={{ fontFamily: "var(--font-sans)", fontSize: 8, fill: "#fff", stroke: "none", filter: "none" }}>
       HACK
     </text>
     <text
       x="16"
       y="21"
       transform="rotate(1 16 21)"
-      style={{ fontFamily: "var(--font-marker)", fontSize: 7, fill: "#fff", stroke: "none", filter: "none" }}
+      style={{ fontFamily: "var(--font-sans)", fontSize: 7, fill: "#fff", stroke: "none", filter: "none" }}
     >
       CLUB
     </text>

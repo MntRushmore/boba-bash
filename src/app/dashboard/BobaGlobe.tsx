@@ -119,10 +119,10 @@ function GlobeArt({ spin, uid }: { spin?: boolean; uid: string }) {
 function NextDropMark({ nextDrop }: { nextDrop: string }) {
   return (
     <>
-      <text x="16" y="34" style={{ fontFamily: "var(--font-marker)", fontSize: 15, fill: "var(--blue)", stroke: "none", filter: "none" }}>
+      <text x="16" y="34" style={{ fontFamily: "var(--font-sans)", fontSize: 15, fill: "var(--blue)", stroke: "none", filter: "none" }}>
         next drop:
       </text>
-      <text x="24" y="53" style={{ fontFamily: "var(--font-marker)", fontSize: 15, fill: "var(--blue)", stroke: "none", filter: "none" }}>
+      <text x="24" y="53" style={{ fontFamily: "var(--font-sans)", fontSize: 15, fill: "var(--blue)", stroke: "none", filter: "none" }}>
         {nextDrop}
       </text>
     </>
@@ -159,7 +159,7 @@ function Pin({
         x={labelRight ? x + 9 : x - 9}
         y={y - 8}
         style={{
-          fontFamily: "var(--font-pangolin)",
+          fontFamily: "var(--font-sans)",
           fontSize: 11.5,
           fill: "var(--ink)",
           stroke: "#f6ecdd",

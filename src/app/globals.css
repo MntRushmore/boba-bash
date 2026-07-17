@@ -175,18 +175,23 @@ a {
   --c-blue: #c9a9ec;    /* taro on dark */
   --c-purple: #d8bfe8;
 
-  font-family: var(--font-pangolin), "Chalkboard SE", cursive;
+  /* clean UI sans everywhere; slightly softer paper for a designed feel */
+  --paper: #f7efe3;
+  --paper2: #f0e6d5;
+  --radius: 14px;
+  --card-border: rgba(122, 92, 64, 0.22);
+  --card-shadow: 0 1px 2px rgba(58, 38, 24, 0.06), 0 6px 20px rgba(58, 38, 24, 0.07);
+
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   color: var(--ink);
+  letter-spacing: -0.01em;
 }
 
-/* ---------- stage: the whiteboard, edged with a hand-drawn marker border --------
-   No plastic device bezel — the page IS the whiteboard. A wobbly ink border
-   (same #wob turbulence as every card) frames it, with a soft outer shadow so
-   it reads as paper on a wall rather than a screen mockup. */
+/* ---------- stage: clean warm canvas, no device bezel ---------- */
 .hd-stage {
   min-height: 100dvh;
   background: var(--paper2);
-  padding: clamp(10px, 1.8vw, 26px);
+  padding: 0;
   display: flex;
 }
 .hd-frame {
@@ -195,28 +200,9 @@ a {
   flex-direction: column;
   position: relative;
 }
-/* the drawn ink border */
-.hd-frame::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 5;
-  border: 3px solid var(--ink);
-  border-radius: 240px 18px 220px 20px / 20px 210px 22px 235px;
-  filter: url(#wob);
-}
-/* a second, lighter offset stroke — like a marker gone over twice */
+.hd-frame::before,
 .hd-frame::after {
-  content: "";
-  position: absolute;
-  inset: 4px 3px 2px 5px;
-  pointer-events: none;
-  z-index: 5;
-  border: 1.6px solid var(--ink-soft);
-  border-radius: 18px 220px 20px 210px / 210px 20px 235px 22px;
-  filter: url(#wob2);
-  opacity: 0.5;
+  content: none;
 }
 .hd-tray {
   display: none;
@@ -226,80 +212,64 @@ a {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 6px 8px 0 rgba(58, 38, 24, 0.1);
-  background: radial-gradient(90rem 40rem at 18% 8%, rgba(232, 201, 160, 0.45), transparent 55%),
-    radial-gradient(70rem 46rem at 85% 90%, rgba(221, 201, 236, 0.35), transparent 60%),
-    radial-gradient(46rem 30rem at 60% 30%, rgba(255, 250, 240, 0.7), transparent 60%),
-    linear-gradient(160deg, var(--paper), var(--paper2));
+  justify-content: flex-start;
+  overflow: visible;
+  background: linear-gradient(170deg, var(--paper), var(--paper2));
 }
+/* clean board: no eraser smudge, no grain */
 .hd-board::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.5;
-  background: radial-gradient(22rem 5rem at 30% 22%, rgba(255, 250, 240, 0.5), transparent 70%),
-    radial-gradient(26rem 6rem at 64% 64%, rgba(239, 224, 201, 0.55), transparent 70%),
-    radial-gradient(18rem 4rem at 45% 86%, rgba(255, 250, 240, 0.45), transparent 70%);
-  transform: rotate(-4deg);
+  content: none;
 }
 .hd-grain {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: multiply;
-  z-index: 60;
+  display: none;
 }
 
-/* ---------- hand-drawn primitives ---------- */
+/* ---------- card primitives (clean, was hand-drawn) ----------
+   .sk/.r2/.tilt-* are kept as class names so existing markup is untouched,
+   but they now render crisp cards: even radius, 1px warm border, soft shadow,
+   no wobble, no rotation. */
 .sk {
   position: relative;
+  border-radius: var(--radius);
 }
 .sk::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  border: 2.3px solid var(--ink);
-  filter: url(#wob);
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  border: 1px solid var(--card-border);
+  border-radius: inherit;
 }
 .sk.thin::before {
-  border-width: 1.8px;
+  border-color: var(--card-border);
 }
 .sk.soft::before {
-  border-color: var(--ink-soft);
+  border-color: var(--card-border);
 }
 .sk.card {
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: 4px 5px 0 rgba(45, 43, 39, 0.1);
+  background: #fffdf9;
+  box-shadow: var(--card-shadow);
 }
 .sk.dark {
   background: linear-gradient(178deg, var(--board), var(--board2));
-  box-shadow: 4px 5px 0 rgba(45, 43, 39, 0.16);
+  box-shadow: var(--card-shadow);
   color: var(--chalk);
 }
 .sk.dark::before {
-  border-color: #0e0f10;
+  border-color: rgba(0, 0, 0, 0.35);
 }
-.r2::before {
-  border-radius: 15px 255px 15px 225px / 225px 15px 255px 15px;
+.r2 {
+  border-radius: var(--radius);
 }
 .marker {
-  font-family: var(--font-marker), "Chalkboard SE", cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
 }
-.tilt-l {
-  transform: rotate(-0.7deg);
-}
-.tilt-r {
-  transform: rotate(0.6deg);
-}
+.tilt-l,
+.tilt-r,
 .tilt-s {
-  transform: rotate(-0.35deg);
+  transform: none;
 }
 
 .hd svg.doodle {
@@ -316,10 +286,9 @@ a {
 .hd svg.doodle ellipse {
   fill: none;
   stroke: var(--ink);
-  stroke-width: 2.1;
+  stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: url(#wob);
 }
 
 /* scribble highlight behind text */
@@ -336,9 +305,8 @@ a {
   height: 0.55em;
   z-index: -1;
   background: var(--yellow);
-  transform: rotate(-1deg) skewX(-8deg);
-  border-radius: 4px 12px 6px 10px;
-  filter: url(#wob);
+  border-radius: 4px;
+  opacity: 0.85;
 }
 
 /* ---------- layout grid (responsive) ---------- */
@@ -421,7 +389,7 @@ a {
   gap: 10px;
 }
 .hd-brand h1 {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 25px;
   letter-spacing: 1px;
   color: var(--ink);
@@ -463,7 +431,7 @@ a {
   color: inherit;
 }
 .hd-chip b {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 15px;
   color: var(--ink);
 }
@@ -484,25 +452,21 @@ a {
   display: grid;
   place-items: center;
   background: var(--taro);
-  font-family: var(--font-marker), cursive;
-  font-size: 16px;
-  border-radius: 50% 45% 52% 48% / 48% 52% 45% 55%;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 50%;
   position: relative;
-  color: var(--tapioca);
+  color: #fff;
   text-decoration: none;
 }
 .hd-avatar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 2.2px solid var(--ink);
-  border-radius: inherit;
-  filter: url(#wob);
+  content: none;
 }
 
 /* ---------- left panel: bashes + milestones ---------- */
 .hd-xp-h {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
   letter-spacing: 1.5px;
   color: var(--ink-soft);
@@ -531,7 +495,7 @@ a {
 .active-file {
   background: var(--yellow);
   padding: 1px 8px;
-  border-radius: 8px 14px 10px 12px;
+  border-radius: 8px;
   transform: rotate(-0.6deg);
   font-weight: bold;
 }
@@ -553,7 +517,7 @@ a {
   text-decoration-thickness: 1.5px;
 }
 .hd-weeks .now {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
   position: relative;
   padding: 0 5px;
@@ -561,10 +525,9 @@ a {
 .hd-weeks .now::after {
   content: "";
   position: absolute;
-  inset: -3px -6px;
-  border: 2.4px solid var(--red);
-  border-radius: 50% 45% 55% 48% / 60% 50% 58% 45%;
-  filter: url(#wob2);
+  inset: -2px -8px;
+  border: 1.6px solid var(--red);
+  border-radius: 999px;
 }
 .hd-weeks .locked {
   color: var(--ink-faint);
@@ -587,7 +550,7 @@ a {
   text-transform: uppercase;
 }
 .hd-stat .big {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 22px;
   line-height: 1.15;
 }
@@ -606,7 +569,7 @@ a {
   align-items: center;
   gap: 10px;
   padding: 10px 16px 8px;
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 14.5px;
   color: var(--ink);
 }
@@ -615,13 +578,13 @@ a {
 }
 .hd-panel-meta {
   margin-left: auto;
-  font-family: var(--font-pangolin), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 12.5px;
   color: var(--ink-faint);
 }
 .hd-statustag {
   margin-left: auto;
-  font-family: var(--font-pangolin), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 12.5px;
 }
 .hd-statustag.good {
@@ -653,18 +616,18 @@ a {
   color: var(--ink-soft);
 }
 .hd-cardnote b {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   color: var(--ink);
 }
 .hd-cardbash {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 24px;
   color: var(--ink);
 }
 .hd-linkfield {
   width: 100%;
   padding: 10px 14px;
-  font-family: var(--font-pangolin), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.7);
@@ -697,7 +660,7 @@ a {
   margin-top: 2px;
 }
 .hd-signedin span {
-  font-family: var(--font-pangolin), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   color: var(--ink-soft);
 }
 
@@ -729,7 +692,7 @@ a {
 }
 .hd-chiplet b {
   color: var(--ink);
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 12px;
 }
 
@@ -737,7 +700,7 @@ a {
 .hd-sticky {
   position: relative;
   padding: 12px 13px 13px;
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   line-height: 1.25;
   box-shadow: 3px 6px 9px rgba(58, 38, 24, 0.24);
 }
@@ -791,7 +754,7 @@ a {
   background: rgba(255, 255, 255, 0.6);
   border: none;
   padding: 3px 11px;
-  border-radius: 8px 12px 9px 11px;
+  border-radius: 8px;
   cursor: pointer;
 }
 .hd-expand-btn:hover {
@@ -828,10 +791,10 @@ a {
   transform: translateX(-50%);
   background: var(--board);
   color: var(--chalk);
-  font-family: var(--font-pangolin), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 12.5px;
   padding: 6px 12px;
-  border-radius: 9px 14px 10px 12px;
+  border-radius: 8px;
   box-shadow: 2px 3px 0 rgba(58, 38, 24, 0.25);
   display: flex;
   flex-direction: column;
@@ -842,7 +805,7 @@ a {
   z-index: 5;
 }
 .hd-globe-tip b {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
 }
 
@@ -889,7 +852,7 @@ a {
   background: rgba(255, 255, 255, 0.6);
   border: none;
   padding: 6px 14px;
-  border-radius: 9px 13px 10px 12px;
+  border-radius: 8px;
   cursor: pointer;
 }
 .hd-modal-close:hover {
@@ -938,7 +901,7 @@ a {
   background: var(--milktea);
 }
 .hd-modal-bash b {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 14.5px;
   display: block;
 }
@@ -1000,7 +963,7 @@ a {
   text-decoration: none;
 }
 .hd-brand-word {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 24px;
   letter-spacing: 1px;
   color: var(--ink);
@@ -1017,7 +980,7 @@ a {
 }
 .hd-backlink {
   align-self: flex-start;
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   color: var(--ink-soft);
   text-decoration: none;
@@ -1036,14 +999,14 @@ a {
 
 /* headings + prose inside pages */
 .hd-eyebrow {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
   letter-spacing: 1.5px;
   color: var(--red);
   text-transform: uppercase;
 }
 .hd-title {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(28px, 4vw, 40px);
   line-height: 1.05;
   color: var(--ink);
@@ -1069,7 +1032,7 @@ a {
   padding: 22px clamp(18px, 3vw, 28px);
 }
 .hd-panel-title {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 18px;
   color: var(--ink);
 }
@@ -1096,7 +1059,7 @@ a {
   }
 }
 .hd-label {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
   letter-spacing: 0.5px;
   color: var(--ink-soft);
@@ -1105,7 +1068,7 @@ a {
 .hd-select {
   width: 100%;
   padding: 10px 14px;
-  font-family: var(--font-pangolin), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 15px;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.72);
@@ -1149,7 +1112,7 @@ a {
 .hd-alert {
   padding: 10px 14px;
   font-size: 14px;
-  border-radius: 9px 14px 10px 12px;
+  border-radius: 8px;
 }
 .hd-alert.bad {
   background: rgba(214, 69, 90, 0.12);
@@ -1170,7 +1133,7 @@ a {
   align-items: center;
   gap: 12px;
   color: var(--ink-faint);
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 12px;
   letter-spacing: 1px;
 }
@@ -1196,7 +1159,7 @@ a {
   gap: 12px;
 }
 .hd-dl-row dt {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 12px;
   letter-spacing: 1px;
   color: var(--ink-faint);
@@ -1234,7 +1197,7 @@ a {
 }
 .hd-list a .name {
   display: block;
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
   color: var(--ink);
 }
@@ -1337,14 +1300,14 @@ a {
   100% { transform: translateY(-120px); opacity: 0; }
 }
 .hd-404-code {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 22px;
   letter-spacing: 3px;
   color: var(--red);
   margin-top: 8px;
 }
 .hd-404-title {
-  font-family: var(--font-marker), cursive;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(30px, 6vw, 48px);
   color: var(--ink);
   transform: rotate(-1deg);

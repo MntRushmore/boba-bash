@@ -4,8 +4,17 @@ import {
   IBM_Plex_Mono,
   Permanent_Marker,
   Pangolin,
+  Nunito,
 } from "next/font/google";
 import "./globals.css";
+
+// Clean UI sans for the whole app (headings, labels, body, numbers).
+const nunito = Nunito({
+  variable: "--font-sans",
+  weight: ["400", "600", "700", "800"],
+  subsets: ["latin"],
+  display: "swap",
+});
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -49,7 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${plexMono.variable} ${permanentMarker.variable} ${pangolin.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${plexMono.variable} ${permanentMarker.variable} ${pangolin.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
