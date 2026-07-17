@@ -52,14 +52,9 @@ export const dynamic = "force-dynamic";
 const money = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-export default async function Dashboard({
-  searchParams,
-}: {
-  searchParams: Promise<{ created?: string }>;
-}) {
+export default async function Dashboard() {
   const session = await getSession();
   if (!session) redirect("/signin");
-  const { created } = await searchParams;
 
   const isOrganizer = session.role === "organizer";
   const person = await getPersonByEmail(session.email);
@@ -87,7 +82,6 @@ export default async function Dashboard({
               referralCode={person?.fields.referral_code}
               firstName={firstName}
               initial={initial}
-              justCreated={created === "1" || created === "true"}
             />
           ) : (
             <AttendeeBoard
@@ -117,13 +111,11 @@ async function OrganizerBoard({
   referralCode,
   firstName,
   initial,
-  justCreated,
 }: {
   organizerId: string;
   referralCode?: string;
   firstName: string;
   initial: string;
-  justCreated: boolean;
 }) {
   const [meetups, stats, pins] = await Promise.all([
     getMeetupsByOrganizer(organizerId),
@@ -231,16 +223,6 @@ async function OrganizerBoard({
           </div>
         </div>
       </div>
-
-      <Stickies
-        notes={[
-          justCreated
-            ? { tone: "teal", text: "sent to staff\nfor approval!", rotate: 3.4 }
-            : { tone: "teal", text: "share your\nLINK today!!", rotate: 3.4 },
-          { tone: "milk", text: "boba o'clock\n= 3pm sharp", rotate: -3 },
-          { tone: "lav", text: "invite your\nwhole class!", rotate: -2.6 },
-        ]}
-      />
     </div>
   );
 }
@@ -379,18 +361,6 @@ async function AttendeeBoard({
           </div>
         </div>
       </div>
-
-      <Stickies
-        notes={[
-          { tone: "teal", text: "don't forget:\nSUBMIT by\nSUNDAY!!", rotate: 3.4 },
-          { tone: "milk", text: "boba o'clock\n= 3pm sharp", rotate: -3 },
-          {
-            tone: "lav",
-            text: hasSubmitted ? "nice work!\nsit tight :)" : "build your\nsite!!",
-            rotate: -2.6,
-          },
-        ]}
-      />
     </div>
   );
 }
@@ -584,27 +554,6 @@ function SettingUpCard({ firstName }: { firstName: string }) {
           it.
         </p>
       </div>
-    </div>
-  );
-}
-
-function Stickies({
-  notes,
-}: {
-  notes: { tone: "teal" | "milk" | "lav"; text: string; rotate: number }[];
-}) {
-  return (
-    <div className="hd-stickies" aria-hidden>
-      {notes.map((n, i) => (
-        <div
-          key={i}
-          className={`hd-sticky ${n.tone}`}
-          style={{ transform: `rotate(${n.rotate}deg)`, whiteSpace: "pre-line" }}
-        >
-          <div className="hd-tape" />
-          {n.text}
-        </div>
-      ))}
     </div>
   );
 }

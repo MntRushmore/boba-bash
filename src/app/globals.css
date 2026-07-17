@@ -696,55 +696,6 @@ a {
   font-size: 12px;
 }
 
-/* ---------- sticky notes ---------- */
-.hd-sticky {
-  position: relative;
-  padding: 12px 13px 13px;
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  line-height: 1.25;
-  box-shadow: 3px 6px 9px rgba(58, 38, 24, 0.24);
-}
-.hd-sticky.teal {
-  background: linear-gradient(174deg, #dcefdd, var(--teal) 55%, #b6d9ba);
-  color: #24502c;
-}
-.hd-sticky.lav {
-  background: linear-gradient(174deg, #ecdcf4, var(--lav) 55%, #cbb0dd);
-  color: #4a2d5a;
-}
-.hd-sticky.milk {
-  background: linear-gradient(174deg, #f2ddc2, var(--milktea) 55%, #d4ac7c);
-  color: #4a3020;
-}
-.hd-tape {
-  position: absolute;
-  width: 58px;
-  height: 17px;
-  background: rgba(255, 255, 255, 0.5);
-  left: 50%;
-  top: -9px;
-  transform: translateX(-50%) rotate(-2deg);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-}
-.hd-stickies {
-  position: absolute;
-  top: 232px;
-  right: 30px;
-  width: 146px;
-  display: flex;
-  flex-direction: column;
-  gap: 34px;
-  z-index: 40;
-  pointer-events: none;
-}
-.hd-stickies .hd-sticky {
-  pointer-events: auto;
-}
-@media (max-width: 1280px) {
-  .hd-stickies {
-    display: none;
-  }
-}
 
 /* ---------- interactive globe ---------- */
 .hd-expand-btn {
@@ -1345,7 +1296,7 @@ a {
    scrolling left by exactly that distance loops seamlessly. */
 @keyframes hd-globe-rotate {
   from { transform: translateX(0); }
-  to { transform: translateX(-244px); }
+  to { transform: translateX(-248px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .hd-globe-spin {

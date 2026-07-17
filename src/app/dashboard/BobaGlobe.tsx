@@ -38,80 +38,112 @@ function project(lat: number, lng: number) {
   return { x: CX + dx, y: CY + dy };
 }
 
+const GRID = "#8fb9d6"; // soft meridian/parallel lines
+
 /**
- * The land masses, drawn once, positioned so they tile horizontally: the group
- * is rendered twice (offset by the disc diameter) inside the spinning wrapper so
- * that as it scrolls left, the second copy seamlessly fills in — a globe turning.
+ * The turning layer: soft muted land shapes + vertical meridian lines, drawn
+ * twice (offset by the disc diameter) so scrolling the group left loops
+ * seamlessly. Clipped to the sphere by the caller.
  */
-function LandMasses() {
+function SpinLayer() {
   return (
     <>
-      <path d="M170 58 C185 46 212 46 224 58 C218 70 196 74 180 70 C172 66 168 62 170 58 Z" style={{ fill: "var(--conf-teal)" }} />
-      <path d="M148 80 C164 62 200 58 216 72 C228 82 224 98 210 102 C220 108 216 120 206 126 C194 138 184 148 172 152 C156 154 142 140 138 122 C132 106 138 92 148 80 Z" style={{ fill: "var(--taro)" }} />
-      <path d="M186 154 C196 150 204 156 206 166 C200 172 190 170 186 162 Z" style={{ fill: "var(--conf-orange)" }} />
-      <path d="M198 172 C216 162 234 170 236 190 C238 214 228 248 212 262 C200 252 190 222 188 198 C187 184 190 178 198 172 Z" style={{ fill: "#7fbf6a" }} />
-      <path d="M260 74 C274 62 296 64 304 78 C298 90 280 96 266 92 C258 88 256 80 260 74 Z" style={{ fill: "#7fbf6a" }} />
-      <path d="M254 100 C274 90 306 94 316 112 C318 122 310 130 296 132 L264 130 C252 122 248 110 254 100 Z" style={{ fill: "var(--conf-yellow)" }} />
-      <path d="M264 130 L296 132 C308 138 312 154 308 172 C302 198 288 226 272 238 C260 226 250 196 248 168 C247 150 254 136 264 130 Z" style={{ fill: "var(--conf-pink)" }} />
-      <path d="M308 80 C328 64 348 72 351 94 C352 112 344 126 330 130 C338 136 336 148 326 152 C314 156 302 146 299 132 C305 126 306 118 304 110 C300 96 302 88 308 80 Z" style={{ fill: "var(--conf-orange)" }} />
-      <path d="M318 134 C328 130 336 138 334 150 C330 160 320 160 316 150 C314 144 314 138 318 134 Z" style={{ fill: "var(--conf-pink)" }} />
-      <path d="M318 226 C330 218 346 222 348 234 C346 246 330 250 320 242 C314 236 314 232 318 226 Z" style={{ fill: "var(--conf-orange)" }} />
+      {/* meridian lines — evenly spaced verticals, curved as ellipse halves */}
+      {[52, 104, 156, 208].map((x) => (
+        <path
+          key={x}
+          d={`M${x} ${CY - R} Q ${x + 20} ${CY} ${x} ${CY + R}`}
+          style={{ fill: "none", stroke: GRID, strokeWidth: 1.1, opacity: 0.55 }}
+        />
+      ))}
+      {/* a few soft continents in muted brand tints, no outline */}
+      <path
+        d="M60 120 C78 104 104 108 112 128 C118 146 104 168 84 172 C66 174 52 158 52 140 C52 132 54 126 60 120 Z"
+        style={{ fill: "var(--matcha, #9ecb8f)", opacity: 0.9 }}
+      />
+      <path
+        d="M120 96 C140 86 166 92 170 112 C172 132 158 150 140 156 C150 164 146 182 130 190 C112 196 96 182 96 162 C96 150 104 140 112 132 C104 122 108 106 120 96 Z"
+        style={{ fill: "var(--taro)", opacity: 0.85 }}
+      />
+      <path
+        d="M110 176 C128 168 146 178 148 198 C150 224 136 250 120 258 C108 246 100 214 100 192 C100 182 104 180 110 176 Z"
+        style={{ fill: "#c39cdd", opacity: 0.8 }}
+      />
+      <path
+        d="M188 132 C206 124 224 134 226 152 C224 170 206 178 190 172 C182 166 180 148 188 132 Z"
+        style={{ fill: "#e0b27a", opacity: 0.85 }}
+      />
+      <path
+        d="M170 214 C186 208 202 216 202 232 C200 246 184 250 172 244 C164 238 162 224 170 214 Z"
+        style={{ fill: "var(--matcha, #9ecb8f)", opacity: 0.85 }}
+      />
     </>
   );
 }
 
 /**
- * The 3D-ish globe: ocean disc, spinning land clipped to the disc, spherical
- * shading (highlight + terminator), rim, and the boba-straw orbit sweeps.
- * `spin` toggles the rotation animation.
+ * A clean flat-vector globe: soft blue sphere with a subtle spherical highlight,
+ * static latitude lines, a spinning grid+land layer clipped to the disc, and a
+ * thin rim. No heavy outline, no clutter.
  */
 function GlobeArt({ spin, uid }: { spin?: boolean; uid: string }) {
   const clip = `globeClip-${uid}`;
-  const shade = `globeShade-${uid}`;
+  const sphere = `globeSphere-${uid}`;
   const glow = `globeGlow-${uid}`;
   return (
     <>
       <defs>
         <clipPath id={clip}>
-          <circle cx={CX} cy={CY} r={R - 2} />
+          <circle cx={CX} cy={CY} r={R} />
         </clipPath>
-        <radialGradient id={glow} cx="38%" cy="32%" r="72%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.55" />
-          <stop offset="45%" stopColor="#ffffff" stopOpacity="0.08" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        <radialGradient id={sphere} cx="40%" cy="34%" r="75%">
+          <stop offset="0%" stopColor="#dcecf6" />
+          <stop offset="60%" stopColor="#bcd7ea" />
+          <stop offset="100%" stopColor="#9cbfda" />
         </radialGradient>
-        <radialGradient id={shade} cx="64%" cy="70%" r="72%">
-          <stop offset="55%" stopColor="#1a3a4a" stopOpacity="0" />
-          <stop offset="100%" stopColor="#173247" stopOpacity="0.42" />
+        <radialGradient id={glow} cx="36%" cy="30%" r="45%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
       </defs>
 
-      {/* orbit straw passing behind */}
-      <path d="M20 96 C140 54 320 66 452 178" style={{ stroke: "#7a5cc4", strokeWidth: 2.6 }} />
+      {/* ocean sphere */}
+      <circle cx={CX} cy={CY} r={R} style={{ fill: `url(#${sphere})`, stroke: "none", filter: "none" }} />
 
-      {/* ocean */}
-      <circle cx={CX} cy={CY} r={R} style={{ fill: "var(--ocean)", strokeWidth: 4.4 }} />
-
-      {/* spinning land + latitude ripples, clipped to the sphere */}
       <g clipPath={`url(#${clip})`}>
+        {/* static parallels (latitude lines) */}
+        {[-78, -40, 0, 40, 78].map((dy) => (
+          <ellipse
+            key={dy}
+            cx={CX}
+            cy={CY + dy}
+            rx={Math.sqrt(Math.max(0, R * R - dy * dy))}
+            ry={7}
+            style={{ fill: "none", stroke: GRID, strokeWidth: 1.1, opacity: 0.45 }}
+          />
+        ))}
+
+        {/* spinning land + meridians */}
         <g className={spin ? "hd-globe-spin" : undefined}>
           <g>
-            <LandMasses />
+            <SpinLayer />
           </g>
-          <g transform={`translate(${2 * R - 4} 0)`}>
-            <LandMasses />
+          <g transform={`translate(${2 * R} 0)`}>
+            <SpinLayer />
           </g>
         </g>
-        {/* spherical shading — no stroke, pure fill overlays */}
-        <circle cx={CX} cy={CY} r={R} style={{ fill: `url(#${shade})`, stroke: "none", filter: "none" }} />
+
+        {/* soft top-left highlight for sphericity */}
         <circle cx={CX} cy={CY} r={R} style={{ fill: `url(#${glow})`, stroke: "none", filter: "none" }} />
       </g>
 
-      {/* rim */}
-      <circle cx={CX} cy={CY} r={R} style={{ fill: "none", strokeWidth: 4.4 }} />
-
-      {/* orbit straw passing in front */}
-      <path d="M14 240 C120 270 330 234 456 128" style={{ stroke: "var(--conf-pink)", strokeWidth: 3 }} />
+      {/* thin rim */}
+      <circle
+        cx={CX}
+        cy={CY}
+        r={R}
+        style={{ fill: "none", stroke: "#7ea6c4", strokeWidth: 1.6, filter: "none" }}
+      />
     </>
   );
 }
