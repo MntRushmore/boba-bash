@@ -179,11 +179,14 @@ a {
   color: var(--ink);
 }
 
-/* ---------- stage: the dark bezel + whiteboard ---------- */
+/* ---------- stage: the whiteboard, edged with a hand-drawn marker border --------
+   No plastic device bezel — the page IS the whiteboard. A wobbly ink border
+   (same #wob turbulence as every card) frames it, with a soft outer shadow so
+   it reads as paper on a wall rather than a screen mockup. */
 .hd-stage {
   min-height: 100dvh;
-  background: #241610;
-  padding: clamp(8px, 1.6vw, 22px);
+  background: var(--paper2);
+  padding: clamp(10px, 1.8vw, 26px);
   display: flex;
 }
 .hd-frame {
@@ -191,19 +194,32 @@ a {
   display: flex;
   flex-direction: column;
   position: relative;
-  background: linear-gradient(175deg, #5a3d28, #2e1d12 30%, #201209);
-  border-radius: 20px;
-  padding: 13px 13px 22px;
-  box-shadow: inset 0 1px 0 rgba(255, 240, 220, 0.16);
+}
+/* the drawn ink border */
+.hd-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  border: 3px solid var(--ink);
+  border-radius: 240px 18px 220px 20px / 20px 210px 22px 235px;
+  filter: url(#wob);
+}
+/* a second, lighter offset stroke — like a marker gone over twice */
+.hd-frame::after {
+  content: "";
+  position: absolute;
+  inset: 4px 3px 2px 5px;
+  pointer-events: none;
+  z-index: 5;
+  border: 1.6px solid var(--ink-soft);
+  border-radius: 18px 220px 20px 210px / 210px 20px 235px 22px;
+  filter: url(#wob2);
+  opacity: 0.5;
 }
 .hd-tray {
-  position: absolute;
-  left: 24%;
-  right: 24%;
-  bottom: 5px;
-  height: 8px;
-  border-radius: 4px;
-  background: linear-gradient(180deg, #6b4a30, #34220f);
+  display: none;
 }
 .hd-board {
   position: relative;
@@ -212,7 +228,8 @@ a {
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
-  border-radius: 9px;
+  border-radius: 12px;
+  box-shadow: 6px 8px 0 rgba(58, 38, 24, 0.1);
   background: radial-gradient(90rem 40rem at 18% 8%, rgba(232, 201, 160, 0.45), transparent 55%),
     radial-gradient(70rem 46rem at 85% 90%, rgba(221, 201, 236, 0.35), transparent 60%),
     radial-gradient(46rem 30rem at 60% 30%, rgba(255, 250, 240, 0.7), transparent 60%),
