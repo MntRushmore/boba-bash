@@ -15,8 +15,19 @@ const AUTHORIZE_URL = `${ISSUER}/oauth/authorize`;
 const TOKEN_URL = `${ISSUER}/oauth/token`;
 const USERINFO_URL = `${ISSUER}/oauth/userinfo`;
 
-/** Scopes: community-allowed + `address` (HQ-gated, for the mailing address). */
-const SCOPES = "openid profile email name verification_status address";
+/*
+ * Community-allowed scopes only, by default. `address` is HQ-gated — requesting
+ * it before the app is promoted makes HC Auth reject the whole request
+ * ("invalid scope"). Once the app is promoted, set HCAUTH_ADDRESS_SCOPE=true to
+ * start pulling the organizer's mailing address from their HC identity.
+ */
+const BASE_SCOPES = ["openid", "profile", "email", "name", "verification_status"];
+
+function scopes(): string {
+  const s = [...BASE_SCOPES];
+  if (process.env.HCAUTH_ADDRESS_SCOPE === "true") s.push("address");
+  return s.join(" ");
+}
 
 export interface HcAuthUser {
   sub: string;
@@ -45,7 +56,7 @@ export function buildAuthorizeUrl(origin: string, state: string): string {
     response_type: "code",
     client_id: clientId,
     redirect_uri: callbackUrl(origin),
-    scope: SCOPES,
+    scope: scopes(),
     state,
   });
   return `${AUTHORIZE_URL}?${params.toString()}`;
