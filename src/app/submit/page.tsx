@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { getSignupsByPerson } from "@/lib/signups";
 import { getMeetup } from "@/lib/meetups";
+import HdShell from "../HdShell";
 import SubmitForm from "./SubmitForm";
 
 export const dynamic = "force-dynamic";
@@ -26,31 +27,20 @@ export default async function SubmitPage() {
   ).filter((m): m is { id: string; name: string } => m !== null);
 
   return (
-    <main className="flex-1 mx-auto w-full max-w-2xl px-6 py-16">
-      <Link
-        href="/dashboard"
-        className="font-mono text-xs uppercase tracking-widest text-ink-soft hover:text-accent"
-      >
-        ← Dashboard
-      </Link>
-      <p className="mt-6 font-mono text-xs uppercase tracking-[0.18em] text-accent">
-        Submit your build
-      </p>
-      <h1 className="mt-1 font-display text-3xl font-semibold text-balance">
-        Share the site you built
-      </h1>
+    <HdShell back={{ href: "/dashboard", label: "dashboard" }} width={620}>
+      <div className="hd-panel sk card">
+        <p className="hd-eyebrow">submit your build</p>
+        <h1 className="hd-title">share the site you built</h1>
 
-      {meetups.length === 0 ? (
-        <p className="mt-6 rounded-xl border border-dashed border-line px-5 py-8 text-center text-ink-soft">
-          You haven&apos;t RSVP&apos;d to a Bash yet. Find one on the{" "}
-          <Link href="/map" className="underline">
-            map
-          </Link>{" "}
-          first.
-        </p>
-      ) : (
-        <SubmitForm meetups={meetups} />
-      )}
-    </main>
+        {meetups.length === 0 ? (
+          <div className="hd-empty sk thin soft" style={{ marginTop: 18 }}>
+            You haven&apos;t RSVP&apos;d to a Bash yet. Find one on the{" "}
+            <Link href="/map">map</Link> first.
+          </div>
+        ) : (
+          <SubmitForm meetups={meetups} />
+        )}
+      </div>
+    </HdShell>
   );
 }

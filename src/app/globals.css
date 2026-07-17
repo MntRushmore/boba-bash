@@ -953,3 +953,303 @@ a {
     min-height: 240px;
   }
 }
+
+/* ============================================================
+   SHARED PAGE SHELL (HdShell) — sign-in, meetup, submit, new, map
+   ============================================================ */
+.hd-page {
+  position: relative;
+  z-index: 2;
+  padding: 18px clamp(16px, 4vw, 48px) 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.hd-page-center {
+  min-height: calc(100dvh - 90px);
+  justify-content: center;
+  align-items: center;
+}
+.hd-pagebar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  align-self: stretch;
+}
+.hd-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.hd-brand-word {
+  font-family: var(--font-marker), cursive;
+  font-size: 24px;
+  letter-spacing: 1px;
+  color: var(--ink);
+  transform: rotate(-1.2deg);
+}
+.hd-brand-word span {
+  color: var(--red);
+}
+.hd-pagebar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hd-backlink {
+  align-self: flex-start;
+  font-family: var(--font-marker), cursive;
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transform: rotate(-0.5deg);
+}
+.hd-backlink:hover {
+  color: var(--red);
+}
+.hd-pagebody {
+  width: 100%;
+  margin: 4px auto 0;
+}
+.hd-page-center .hd-pagebody {
+  margin-top: 0;
+}
+
+/* headings + prose inside pages */
+.hd-eyebrow {
+  font-family: var(--font-marker), cursive;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  color: var(--red);
+  text-transform: uppercase;
+}
+.hd-title {
+  font-family: var(--font-marker), cursive;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.05;
+  color: var(--ink);
+  transform: rotate(-0.6deg);
+  margin: 4px 0 2px;
+}
+.hd-lede {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 52ch;
+}
+.hd-prose a,
+.hd-lede a,
+.hd-cardnote a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+}
+
+/* generic hand-drawn card panel used by page bodies */
+.hd-panel {
+  padding: 22px clamp(18px, 3vw, 28px);
+}
+.hd-panel-title {
+  font-family: var(--font-marker), cursive;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+/* ---------- form primitives ---------- */
+.hd-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.hd-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hd-grid2 {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 560px) {
+  .hd-grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+.hd-label {
+  font-family: var(--font-marker), cursive;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: var(--ink-soft);
+}
+.hd-input,
+.hd-select {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-pangolin), cursive;
+  font-size: 15px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.72);
+  outline: none;
+}
+.hd-input::placeholder {
+  color: var(--ink-faint);
+}
+.hd-select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M4 6 L8 11 L12 6' fill='none' stroke='%237a5c40' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 34px;
+}
+.hd-input:focus,
+.hd-select:focus {
+  background: #fff;
+}
+.hd-input.sk::before,
+.hd-select.sk::before {
+  border-color: var(--ink-soft);
+}
+
+/* full-width primary button variant */
+.hd-bigbtn.block {
+  align-self: stretch;
+  text-align: center;
+}
+.hd-bigbtn.primary {
+  background: var(--red);
+  color: var(--chalk);
+}
+.hd-bigbtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* inline alert / info pills */
+.hd-alert {
+  padding: 10px 14px;
+  font-size: 14px;
+  border-radius: 9px 14px 10px 12px;
+}
+.hd-alert.bad {
+  background: rgba(214, 69, 90, 0.12);
+  color: var(--red);
+}
+.hd-alert.good {
+  background: rgba(79, 158, 90, 0.14);
+  color: var(--green);
+}
+.hd-alert.info {
+  background: rgba(232, 201, 160, 0.35);
+  color: var(--ink-soft);
+}
+
+/* divider with center label */
+.hd-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-faint);
+  font-family: var(--font-marker), cursive;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.hd-divider::before,
+.hd-divider::after {
+  content: "";
+  flex: 1;
+  height: 1.5px;
+  background: repeating-linear-gradient(90deg, var(--ink-faint) 0 6px, transparent 6px 12px);
+  opacity: 0.6;
+}
+
+/* definition list (meetup details) */
+.hd-dl {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 0;
+}
+.hd-dl-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.hd-dl-row dt {
+  font-family: var(--font-marker), cursive;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  min-width: 62px;
+}
+.hd-dl-row dd {
+  font-size: 16px;
+  color: var(--ink);
+}
+
+/* list of bashes (map + submit dropdowns fallbacks) */
+.hd-list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 640px) {
+  .hd-list {
+    grid-template-columns: 1fr;
+  }
+}
+.hd-list a {
+  display: block;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.62);
+  color: inherit;
+  text-decoration: none;
+}
+.hd-list a:hover {
+  background: var(--milktea);
+}
+.hd-list a .name {
+  display: block;
+  font-family: var(--font-marker), cursive;
+  font-size: 16px;
+  color: var(--ink);
+}
+.hd-list a .meta {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 1px;
+}
+
+/* map frame */
+.hd-mapframe {
+  overflow: hidden;
+  border-radius: 12px;
+}
+.hd-mapframe > * {
+  display: block;
+}
+
+/* empty-state box */
+.hd-empty {
+  padding: 26px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+/* blank landing */
+.hd-blank {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(160deg, var(--paper), var(--paper2));
+  padding: 24px;
+}

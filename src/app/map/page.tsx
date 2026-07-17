@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPublicMeetups, parseGeocode } from "@/lib/meetups";
+import HdShell from "../HdShell";
 import MapView from "./MapView";
 import type { MapPin } from "./MapInner";
 
@@ -25,58 +26,41 @@ export default async function MapPage() {
   });
 
   return (
-    <main className="flex-1">
-      <div className="mx-auto w-full max-w-5xl px-6 pt-12">
-        <Link
-          href="/"
-          className="font-mono text-xs uppercase tracking-widest text-ink-soft hover:text-accent"
-        >
-          ← Home
-        </Link>
-        <h1 className="mt-4 font-display text-4xl font-semibold text-balance">
-          Find a Boba Bash near you
-        </h1>
-        <p className="mt-2 text-ink-soft">
-          Pick a spot on the map, or browse the list below. Sign in to RSVP.
-        </p>
+    <HdShell back={{ href: "/dashboard", label: "dashboard" }} width={1040}>
+      <p className="hd-eyebrow">worldwide</p>
+      <h1 className="hd-title">find a Boba Bash near you</h1>
+      <p className="hd-lede" style={{ marginTop: 6 }}>
+        Pick a spot on the map, or browse the list below. Sign in to RSVP.
+      </p>
+
+      <div className="hd-mapframe sk card" style={{ marginTop: 18 }}>
+        <MapView pins={pins} />
       </div>
 
-      <div className="mx-auto mt-8 w-full max-w-5xl px-6">
-        <div className="overflow-hidden rounded-xl border border-line">
-          <MapView pins={pins} />
-        </div>
-      </div>
-
-      <section className="mx-auto mt-10 mb-16 w-full max-w-5xl px-6">
-        <h2 className="font-display text-xl font-semibold">All Bashes</h2>
+      <section style={{ marginTop: 26 }}>
+        <h2 className="hd-panel-title">all Bashes</h2>
         {meetups.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-dashed border-line px-5 py-8 text-center text-ink-soft">
+          <div className="hd-empty sk thin soft" style={{ marginTop: 12 }}>
             No approved Bashes yet — check back soon, or{" "}
-            <Link href="/dashboard" className="underline">
-              organize one
-            </Link>
-            .
-          </p>
+            <Link href="/dashboard">organize one</Link>.
+          </div>
         ) : (
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+          <ul className="hd-list">
             {meetups.map((m) => (
               <li key={m.id}>
-                <Link
-                  href={`/meetup/${m.id}`}
-                  className="block rounded-xl border border-line bg-card px-5 py-4 transition hover:border-accent"
-                >
-                  <p className="font-semibold">{m.fields.name}</p>
-                  <p className="text-sm text-ink-soft">
+                <Link href={`/meetup/${m.id}`} className="sk thin soft">
+                  <span className="name">{m.fields.name}</span>
+                  <span className="meta">
                     {[m.fields.venue, m.fields.city, m.fields.date]
                       .filter(Boolean)
                       .join(" · ")}
-                  </p>
+                  </span>
                 </Link>
               </li>
             ))}
           </ul>
         )}
       </section>
-    </main>
+    </HdShell>
   );
 }

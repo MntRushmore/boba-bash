@@ -5,11 +5,6 @@ import { createMeetupAction, type MeetupFormState } from "./actions";
 
 const initial: MeetupFormState = {};
 
-const fieldClass =
-  "mt-1 w-full rounded-lg border border-line bg-paper px-4 py-2.5 text-ink outline-none focus:border-accent";
-const labelClass =
-  "block font-mono text-xs uppercase tracking-[0.12em] text-ink-soft";
-
 export default function MeetupForm() {
   const [state, formAction, pending] = useActionState(
     createMeetupAction,
@@ -17,15 +12,11 @@ export default function MeetupForm() {
   );
 
   return (
-    <form action={formAction} className="mt-8 flex flex-col gap-5">
-      {state.error ? (
-        <p className="rounded-lg bg-bad/10 px-4 py-2 text-sm text-bad">
-          {state.error}
-        </p>
-      ) : null}
+    <form action={formAction} className="hd-form" style={{ marginTop: 18 }}>
+      {state.error ? <p className="hd-alert bad">{state.error}</p> : null}
 
-      <div>
-        <label htmlFor="name" className={labelClass}>
+      <div className="hd-field">
+        <label htmlFor="name" className="hd-label">
           Bash name
         </label>
         <input
@@ -33,51 +24,46 @@ export default function MeetupForm() {
           name="name"
           required
           placeholder="Downtown Boba Bash"
-          className={fieldClass}
+          className="hd-input sk thin soft"
         />
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="city" className={labelClass}>
-            City
+      <div className="hd-grid2">
+        <div className="hd-field">
+          <label htmlFor="city" className="hd-label">
+            city
           </label>
           <input
             id="city"
             name="city"
             required
             placeholder="San Jose, CA"
-            className={fieldClass}
+            className="hd-input sk thin soft"
           />
         </div>
-        <div>
-          <label htmlFor="venue" className={labelClass}>
-            Café / venue
+        <div className="hd-field">
+          <label htmlFor="venue" className="hd-label">
+            café / venue
           </label>
           <input
             id="venue"
             name="venue"
             placeholder="Tea Top on 2nd St"
-            className={fieldClass}
+            className="hd-input sk thin soft"
           />
         </div>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div>
-          <label htmlFor="date" className={labelClass}>
-            Date
+      <div className="hd-grid2">
+        <div className="hd-field">
+          <label htmlFor="date" className="hd-label">
+            date
           </label>
-          <input
-            id="date"
-            name="date"
-            type="date"
-            className={fieldClass}
-          />
+          <input id="date" name="date" type="date" className="hd-input sk thin soft" />
         </div>
-        <div>
-          <label htmlFor="capacity" className={labelClass}>
-            Capacity (optional)
+        <div className="hd-field">
+          <label htmlFor="capacity" className="hd-label">
+            capacity (optional)
           </label>
           <input
             id="capacity"
@@ -85,32 +71,32 @@ export default function MeetupForm() {
             type="number"
             min="0"
             placeholder="20"
-            className={fieldClass}
+            className="hd-input sk thin soft"
           />
         </div>
       </div>
 
-      <div>
-        <label htmlFor="slack_channel" className={labelClass}>
+      <div className="hd-field">
+        <label htmlFor="slack_channel" className="hd-label">
           Slack channel (optional)
         </label>
         <input
           id="slack_channel"
           name="slack_channel"
           placeholder="#boba-bash-sanjose"
-          className={fieldClass}
+          className="hd-input sk thin soft"
         />
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-full bg-syrup px-6 py-3 font-mono text-sm font-semibold text-cream-soft transition hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
+        className="hd-bigbtn primary sk marker"
       >
-        {pending ? "Creating…" : "Create Bash"}
+        {pending ? "creating…" : "create Bash ▸"}
       </button>
 
-      <p className="text-sm text-ink-soft">
+      <p className="hd-cardnote" style={{ margin: 0 }}>
         New Bashes are reviewed by Hack Club staff before they go live on the
         map. You&apos;ll still get your referral link right away.
       </p>

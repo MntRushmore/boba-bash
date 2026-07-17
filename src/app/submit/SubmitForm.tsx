@@ -5,11 +5,6 @@ import { submitSiteAction, type SubmitState } from "./actions";
 
 const initial: SubmitState = {};
 
-const fieldClass =
-  "mt-1 w-full rounded-lg border border-line bg-paper px-4 py-2.5 text-ink outline-none focus:border-accent";
-const labelClass =
-  "block font-mono text-xs uppercase tracking-[0.12em] text-ink-soft";
-
 export default function SubmitForm({
   meetups,
 }: {
@@ -21,23 +16,19 @@ export default function SubmitForm({
   );
 
   return (
-    <form action={formAction} className="mt-8 flex flex-col gap-5">
-      {state.error ? (
-        <p className="rounded-lg bg-bad/10 px-4 py-2 text-sm text-bad">
-          {state.error}
-        </p>
-      ) : null}
+    <form action={formAction} className="hd-form" style={{ marginTop: 18 }}>
+      {state.error ? <p className="hd-alert bad">{state.error}</p> : null}
 
-      <div>
-        <label htmlFor="meetup_id" className={labelClass}>
-          Which Bash?
+      <div className="hd-field">
+        <label htmlFor="meetup_id" className="hd-label">
+          which Bash?
         </label>
         <select
           id="meetup_id"
           name="meetup_id"
           required
           defaultValue={meetups.length === 1 ? meetups[0].id : ""}
-          className={fieldClass}
+          className="hd-select sk thin soft"
         >
           <option value="" disabled>
             Choose your Bash…
@@ -50,8 +41,8 @@ export default function SubmitForm({
         </select>
       </div>
 
-      <div>
-        <label htmlFor="repo_url" className={labelClass}>
+      <div className="hd-field">
+        <label htmlFor="repo_url" className="hd-label">
           GitHub repo
         </label>
         <input
@@ -59,38 +50,37 @@ export default function SubmitForm({
           name="repo_url"
           type="url"
           placeholder="https://github.com/you/my-site"
-          className={fieldClass}
+          className="hd-input sk thin soft"
         />
       </div>
 
-      <div>
-        <label htmlFor="live_url" className={labelClass}>
-          Live site
+      <div className="hd-field">
+        <label htmlFor="live_url" className="hd-label">
+          live site
         </label>
         <input
           id="live_url"
           name="live_url"
           type="url"
           placeholder="https://you.github.io/my-site"
-          className={fieldClass}
+          className="hd-input sk thin soft"
         />
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-full bg-syrup px-6 py-3 font-mono text-sm font-semibold text-cream-soft transition hover:-translate-y-0.5 disabled:opacity-60"
+        className="hd-bigbtn primary sk marker"
       >
-        {pending ? "Submitting…" : "Submit my site"}
+        {pending ? "submitting…" : "submit my site ▸"}
       </button>
 
-      <p className="text-sm text-ink-soft">
+      <p className="hd-cardnote" style={{ margin: 0 }}>
         Hack Club staff review submissions against the{" "}
         <a
           href="https://boba.hackclub.com/requirements.html"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline"
         >
           Boba Drops requirements
         </a>

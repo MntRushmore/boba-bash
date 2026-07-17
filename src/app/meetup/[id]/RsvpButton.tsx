@@ -11,9 +11,9 @@ export default function RsvpButton({ meetupId }: { meetupId: string }) {
       type="button"
       disabled={pending}
       onClick={() => startTransition(() => rsvpAction(meetupId))}
-      className="rounded-full bg-syrup px-7 py-3 font-mono text-sm font-semibold text-cream-soft transition hover:-translate-y-0.5 disabled:opacity-60"
+      className="hd-bigbtn primary sk marker"
     >
-      {pending ? "Saving your spot…" : "RSVP to this Bash"}
+      {pending ? "saving your spot…" : "RSVP to this Bash ▸"}
     </button>
   );
 }
