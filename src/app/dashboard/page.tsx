@@ -3,13 +3,19 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { getPersonByEmail, applyReferral } from "@/lib/people";
 import { readReferral, clearReferral } from "@/lib/referral";
-import { getMeetupsByOrganizer, getMeetup } from "@/lib/meetups";
+import {
+  getMeetupsByOrganizer,
+  getMeetup,
+  getPublicMeetups,
+  parseGeocode,
+} from "@/lib/meetups";
 import { getOrganizerStats } from "@/lib/stats";
 import { getSignupsByPerson } from "@/lib/signups";
 import { getSubmission } from "@/lib/submissions";
 import { PAYOUT_PER_SIGNUP } from "@/lib/schema";
 import type { SubmissionStatus } from "@/lib/schema";
 import ReferralCard from "./ReferralCard";
+import BobaGlobe, { type GlobePin } from "./BobaGlobe";
 import {
   DoodleDefs,
   HackFlag,
@@ -19,8 +25,27 @@ import {
   LockIcon,
   PeopleIcon,
   CupStat,
-  ScribbleGlobe,
 } from "./doodles";
+
+/** Approved, geocoded Bashes projected into globe pins. */
+async function getGlobePins(): Promise<GlobePin[]> {
+  const meetups = await getPublicMeetups();
+  const pins: GlobePin[] = [];
+  for (const m of meetups) {
+    const geo = parseGeocode(m.fields.geocode);
+    if (!geo) continue;
+    pins.push({
+      id: m.id,
+      name: m.fields.name,
+      city: m.fields.city,
+      date: m.fields.date,
+      venue: m.fields.venue,
+      lat: geo.lat,
+      lng: geo.lng,
+    });
+  }
+  return pins;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -100,9 +125,10 @@ async function OrganizerBoard({
   initial: string;
   justCreated: boolean;
 }) {
-  const [meetups, stats] = await Promise.all([
+  const [meetups, stats, pins] = await Promise.all([
     getMeetupsByOrganizer(organizerId),
     getOrganizerStats(organizerId),
+    getGlobePins(),
   ]);
 
   const origin = process.env.APP_ORIGIN || "https://bash.hackclub.com";
@@ -192,7 +218,8 @@ async function OrganizerBoard({
             ) : (
               <SettingUpCard firstName={firstName} />
             )}
-            <PreviewPanel
+            <BobaGlobe
+              pins={pins}
               countries={87}
               cups={12409}
               nextDrop={primaryBash?.fields.city}
@@ -231,7 +258,10 @@ async function AttendeeBoard({
   email: string;
   initial: string;
 }) {
-  const signups = await getSignupsByPerson(personId);
+  const [signups, pins] = await Promise.all([
+    getSignupsByPerson(personId),
+    getGlobePins(),
+  ]);
 
   const cards = (
     await Promise.all(
@@ -332,7 +362,8 @@ async function AttendeeBoard({
               isApproved={isApproved}
               email={email}
             />
-            <PreviewPanel
+            <BobaGlobe
+              pins={pins}
               countries={87}
               cups={12409}
               nextDrop={primary?.city}
@@ -491,43 +522,6 @@ function StatCard({
         <div className="lbl">{label}</div>
         <div className="big">{big}</div>
         {sub ? <div className={`stat-sub ${subUp ? "up" : ""}`}>{sub}</div> : null}
-      </div>
-    </div>
-  );
-}
-
-function PreviewPanel({
-  countries,
-  cups,
-  nextDrop,
-  status,
-  statusOk,
-}: {
-  countries: number;
-  cups: number;
-  nextDrop?: string;
-  status: string;
-  statusOk?: boolean;
-}) {
-  return (
-    <div className="hd-preview sk card r2">
-      <div className="hd-panel-h light">boba radar · worldwide</div>
-      <div className="hd-pv-body">
-        <ScribbleGlobe nextDrop={nextDrop} />
-      </div>
-      <div className="hd-readouts">
-        <span className="hd-chiplet sk thin soft">
-          <b>{countries}</b> countries
-        </span>
-        <span className="hd-chiplet sk thin soft r2">
-          <b>{cups.toLocaleString()}</b> cups
-        </span>
-        <span
-          className="hd-chiplet sk thin soft r2"
-          style={{ color: statusOk ? "var(--green)" : "var(--ink-soft)" }}
-        >
-          {status}
-        </span>
       </div>
     </div>
   );
